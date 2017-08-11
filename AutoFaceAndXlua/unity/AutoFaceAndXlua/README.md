@@ -1,5 +1,5 @@
 ##Autoface and xlua 前端架构
-##  -   2017.8.10
+
 版本需求unity5.4.4f2
 
 - 1.引入 Autoface 框架，及ioc模式
@@ -12,13 +12,3 @@
   4.后期引入tolua的lua管理
 
 沟通QQ群：665419015
-
-##
-
-##-2017.8.11
-版本更新接入android
-
-
-- 接入android与unity之间的通信
-- 添加unity打包工具
-- 添加unity与android之间的通信测试工程 
