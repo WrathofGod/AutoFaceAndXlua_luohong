@@ -9,6 +9,6 @@
   1.在3RD/AutofaceTest写入了1个依赖Autoface 加载lua执行的测试工程，
   2.功能之间可以接口依赖，ui逻辑后期采用xlua编辑
   3.将UI资源导入成支持unity5.4.2版本
-  4.后期引入tolua的lua管理
+  4.后期引入xlua的lua管理
 
-沟通QQ群：665419015
+沟通QQ群：189589638
