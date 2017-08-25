@@ -8,13 +8,107 @@
     <artifactId>Core</artifactId>
     <version>1.0</version>
 
+    <!--添加依赖无法下载，自动下载的仓库-->
+    <repositories>
+        <!-- 私仓 -->
+        <repository>
+            <id>releases</id>
+            <name>inner-release</name>
+            <layout>default</layout>
+            <url>http://xiaomo.info:8081/nexus/content/groups/public</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <!-- 阿里云库 -->
+        <repository>
+            <id>central</id>
+            <name>aliyun maven</name>
+            <layout>default</layout>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <!--添加配置-->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <!--私仓核心包start-->
+        <gameCore.version>1.0.2</gameCore.version>
+
+        <!--netty-->
+        <netty.version>4.1.12.Final</netty.version>
+
+        <!-- mysql版本号-->
+        <mysql.version>5.1.37</mysql.version>
+        <!-- protostuff版本号-->
+        <protostuff.version>1.3.7</protostuff.version>
+
+        <apache-commons-codec.version>1.10</apache-commons-codec.version>
+        <kryo.version>3.0.3</kryo.version>
+        <fastjson.version>1.2.29</fastjson.version>
+        <httpclient.version>4.5.2</httpclient.version>
+        <slf4j.version>1.7.25</slf4j.version>
+        <dom4j.version>1.6.1</dom4j.version>
+        <logback.version>1.1.3</logback.version>
+        <commons-lang3.version>3.6</commons-lang3.version>
+        <lombok.version>1.16.16</lombok.version>
+        <junit.version>3.8.1</junit.version>
+        <beanutils.version>1.9.2</beanutils.version>
+        <mysql.version>5.1.37</mysql.version>
+        <protostuff.version>1.3.7</protostuff.version>
+        <druid.version>1.0.16</druid.version>
+        <concurrentlinkedhashmap.version>1.4.2</concurrentlinkedhashmap.version>
+    </properties>
+
     <!--添加依赖的地方，如工程需要依赖其他模块，这里添加-->
+    <dependencyManagement>
     <dependencies>
+
+        <dependency>
+            <groupId>info.xiaomo</groupId>
+            <artifactId>all</artifactId>
+            <version>${gameCore.version}</version>
+        </dependency>
+
         <!--依赖Netty -->
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.0.Final</version>
+            <version>${netty.version}</version>
         </dependency>
+
+        <!-- protostuff -->
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-core</artifactId>
+            <version>${protostuff.version}</version>
+        </dependency>
+        <!-- protostuff -->
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-runtime</artifactId>
+            <version>${protostuff.version}</version>
+        </dependency>
+        <!-- protostuff -->
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-api</artifactId>
+            <version>${protostuff.version}</version>
+        </dependency>
+
+        <!--数据库-->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.version}</version>
+        </dependency>
+
+
     </dependencies>
+    </dependencyManagement>
 </project>
