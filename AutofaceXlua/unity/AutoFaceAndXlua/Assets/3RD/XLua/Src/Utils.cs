@@ -95,15 +95,31 @@ namespace XLua
                    select type;
         }
 #else
-        public static IEnumerable<Type> GetAllTypes(bool exclude_generic_definition = true)
+        public static List<Type> GetAllTypes(bool exclude_generic_definition = true)
         {
-            return from assembly in AppDomain.CurrentDomain.GetAssemblies()
+            List<Type> allTypes = new List<Type>();
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            for(int i = 0; i < assemblies.Length; i++)
+            {
+                try
+                {
 #if UNITY_EDITOR || XLUA_GENERAL
-                                          where !(assembly.ManifestModule is System.Reflection.Emit.ModuleBuilder)
+                    if (!(assemblies[i].ManifestModule is System.Reflection.Emit.ModuleBuilder))
+                    {
 #endif
-                                          from type in assembly.GetTypes()
-                                          where exclude_generic_definition ? !type.IsGenericTypeDefinition() : true
-                                          select type;
+                        allTypes.AddRange(assemblies[i].GetTypes()
+                        .Where(type => exclude_generic_definition ? !type.IsGenericTypeDefinition() : true)
+                        );
+#if UNITY_EDITOR || XLUA_GENERAL
+                    }
+#endif
+                }
+                catch (Exception)
+                {
+                }
+            }
+
+            return allTypes;
         }
 #endif
 
@@ -389,7 +405,7 @@ namespace XLua
             };
         }
 
-        static IEnumerable<MethodInfo> GetExtensionMethodsOf(Type type_to_be_extend)
+        internal static IEnumerable<MethodInfo> GetExtensionMethodsOf(Type type_to_be_extend)
         {
             if (InternalGlobals.extensionMethodMap == null)
             {
@@ -446,7 +462,7 @@ namespace XLua
 
                 InternalGlobals.extensionMethodMap = (from type in type_def_extention_method
                                         from method in type.GetMethods(BindingFlags.Static | BindingFlags.Public)
-                                        where IsSupportedExtensionMethod(method)
+                                        where method.IsDefined(typeof(ExtensionAttribute), false) && IsSupportedMethod(method)
                                         group method by getExtendedType(method)).ToDictionary(g => g.Key, g => g as IEnumerable<MethodInfo>);
             }
             IEnumerable<MethodInfo> ret = null;
@@ -836,7 +852,7 @@ namespace XLua
             LuaAPI.lua_pop(L, 1);
             LuaAPI.lua_rawset(L, cls_meta); // set __newindex
 
-            LuaCSFunction constructor = translator.methodWrapsCache.GetConstructorWrap(type);
+            LuaCSFunction constructor = typeof(Delegate).IsAssignableFrom(type)? translator.metaFunctions.DelegateCtor : translator.methodWrapsCache.GetConstructorWrap(type);
             if (constructor == null)
             {
                 constructor = (RealStatePtr LL) =>
@@ -1079,10 +1095,12 @@ namespace XLua
             int static_getter_count, int static_setter_count)
 #endif
         {
-#if GEN_CODE_MINIMIZE
             ObjectTranslator translator = ObjectTranslatorPool.Instance.Find(L);
-#endif
             LuaAPI.lua_createtable(L, 0, class_field_count);
+
+            LuaAPI.xlua_pushasciistring(L, "UnderlyingSystemType");
+            translator.PushAny(L, type);
+            LuaAPI.lua_rawset(L, -3);
 
             int cls_table = LuaAPI.lua_gettop(L);
 
@@ -1303,14 +1321,14 @@ namespace XLua
             return true;
         }
 
-        public static bool IsSupportedExtensionMethod(MethodBase method)
+        public static bool IsSupportedMethod(MethodInfo method)
         {
-            if (!method.IsDefined(typeof(ExtensionAttribute), false))
-                return false;
             if (!method.ContainsGenericParameters)
                 return true;
             var methodParameters = method.GetParameters();
+            var returnType = method.ReturnType;
             var hasValidGenericParameter = false;
+            var returnTypeValid = !returnType.IsGenericParameter;
             for (var i = 0; i < methodParameters.Length; i++)
             {
                 var parameterType = methodParameters[i].ParameterType;
@@ -1324,9 +1342,16 @@ namespace XLua
                             return false;
                     }
                     hasValidGenericParameter = true;
+                    if (!returnTypeValid)
+                    {
+                        if (parameterType == returnType)
+                        {
+                            returnTypeValid = true;
+                        }
+                    }
                 }
             }
-            return hasValidGenericParameter;
+            return hasValidGenericParameter && returnTypeValid;
         }
 
         private static Type getExtendedType(MethodInfo method)
