@@ -65,10 +65,7 @@ public class Packager
         string assetfile = string.Empty;  //素材文件名
         string resPath = AppDataPath + "/" + AppConst.AssetDirname + "/";
         if (!Directory.Exists(resPath)) Directory.CreateDirectory(resPath);
-        if (AppConst.ExampleMode)
-        {
-            BuildPipeline.BuildAssetBundles(resPath, BuildAssetBundleOptions.None, target);
-        }
+
 
         string luaPath = resPath + "/lua/";
 
@@ -205,11 +202,6 @@ public class Packager
     [MenuItem("Game/Build Protobuf-lua-gen File")]
     public static void BuildProtobufFile()
     {
-        if (!AppConst.ExampleMode)
-        {
-            UnityEngine.Debug.LogError("若使用编码Protobuf-lua-gen功能，需要自己配置外部环境！！");
-            return;
-        }
         string dir = AppDataPath + "/Lua/3rd/pblua";
         paths.Clear(); files.Clear(); Recursive(dir);
 

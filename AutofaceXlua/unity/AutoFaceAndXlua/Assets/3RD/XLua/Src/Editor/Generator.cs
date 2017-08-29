@@ -27,7 +27,7 @@ namespace CSObjectWrapEditor
 #if XLUA_GENERAL
         public static string common_path = "./Gen/";
 #else
-        public static string common_path = Application.dataPath + "/XLua/Gen/";
+        public static string common_path = Application.dataPath + "/3RD/XLua/Gen/";
 #endif
 
         static GeneratorConfig()
@@ -1206,7 +1206,9 @@ namespace CSObjectWrapEditor
             {
                 object[] ccla = test.GetCustomAttributes(typeof(LuaCallCSharpAttribute), false);
                 AddToList(LuaCallCSharp, get_cfg, ccla[0]);
+#pragma warning disable 618
                 if (ccla.Length == 1 && (((ccla[0] as LuaCallCSharpAttribute).Flag & GenFlag.GCOptimize) != 0))
+#pragma warning restore 618
                 {
                     AddToList(GCOptimizeList, get_cfg, ccla[0]);
                 }
@@ -1487,6 +1489,10 @@ namespace CSObjectWrapEditor
                 {
                     Debug.LogError("gen file fail! template=" + template_src + ", err=" + e.Message + ", stack=" + e.StackTrace);
                 }
+                finally
+                {
+                    gen_task.Output.Close();
+                }
             }
         }
 
@@ -1517,26 +1523,17 @@ namespace CSObjectWrapEditor
         }
 
 #if !XLUA_GENERAL
-        [InitializeOnLoad]
-        public class Startup
+        [UnityEditor.Callbacks.PostProcessScene]
+        public static void CheckGenrate()
         {
-
-            static Startup()
+            if (EditorApplication.isCompiling || Application.isPlaying)
             {
-                EditorApplication.update += Update;
+                return;
             }
-
-
-            static void Update()
+            if (!DelegateBridge.Gen_Flag)
             {
-                EditorApplication.update -= Update;
-
-                if (!System.IO.File.Exists(GeneratorConfig.common_path + "XLuaGenAutoRegister.cs"))
-                {
-                    UnityEngine.Debug.LogWarning("code has not been genrate, may be not work in phone!");
-                }
+                throw new InvalidOperationException("Code has not been genrated, may be not work in phone!");
             }
-
         }
 #endif
     }

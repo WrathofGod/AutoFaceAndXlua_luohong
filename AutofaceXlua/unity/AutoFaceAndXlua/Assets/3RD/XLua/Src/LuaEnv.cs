@@ -46,7 +46,15 @@ namespace XLua
         internal int errorFuncRef = -1;
 
 #if THREAD_SAFE || HOTFIX_ENABLE
-        internal object luaEnvLock = new object();
+        internal static object luaLock = new object();
+
+        internal object luaEnvLock
+        {
+            get
+            {
+                return luaLock;
+            }
+        }
 #endif
 
         const int LIB_VERSION_EXPECT = 102;
@@ -261,8 +269,6 @@ namespace XLua
             }
 #endif
         }
-
-
 
         public object[] DoString(string chunk, string chunkName = "chunk", LuaTable env = null)
         {
